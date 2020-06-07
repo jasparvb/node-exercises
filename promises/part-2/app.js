@@ -3,7 +3,7 @@ $(function() {
   //Get one card from new deck
   $.getJSON(`${baseURL}/new/draw/?count=1`)
     .then(data => {
-      console.log(data.cards[0].value, ' of ', data.cards[0].suit)
+      console.log(`${data.cards[0].value} of ${data.cards[0].suit}`)
     });
     
   //Get two cards from new deck

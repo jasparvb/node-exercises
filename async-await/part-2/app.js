@@ -1,37 +1,35 @@
 $(function() {
   let baseURL = "https://deckofcardsapi.com/api/deck"
   //Get one card from new deck
-  $.getJSON(`${baseURL}/new/draw/?count=1`)
-    .then(data => {
-      console.log(data.cards[0].value, ' of ', data.cards[0].suit)
-    });
+  async function getOneCard() {
+    let data = await $.getJSON(`${baseURL}/new/draw/?count=1`);
+    console.log(`${data.cards[0].value} of ${data.cards[0].suit}`);
+  }
+  getOneCard();
     
   //Get two cards from new deck
-  let card1 = '';
-  $.getJSON(`${baseURL}/new/draw/?count=1`)
-    .then(data => {
-      card1 = `${data.cards[0].value} of ${data.cards[0].suit}`
-      return $.getJSON(`${baseURL}/${data.deck_id}/draw/?count=1`)
-    })
-    .then(data => {
-      let card2 = `${data.cards[0].value} of ${data.cards[0].suit}`
-      console.log(card1);
-      console.log(card2);
-    });
+  async function getTwoCards() {
+    let data = await $.getJSON(`${baseURL}/new/draw/?count=1`);
+    let data2 = await $.getJSON(`${baseURL}/${data.deck_id}/draw/?count=1`);
+    console.log(`${data.cards[0].value} of ${data.cards[0].suit}`);
+    console.log(`${data2.cards[0].value} of ${data2.cards[0].suit}`);
+  }
+  getTwoCards();
 
   //Draw card and display on page
   let deckId = null;
-  $.getJSON(`${baseURL}/new/shuffle/`).then(data => {
-    deckId = data.deck_id;
-  });
+  async function drawCards() {
+    if (deckId === null) {
+      let deck = await $.getJSON(`${baseURL}/new/shuffle/`);
+      deckId = deck.deck_id;
+    }
+      
+    let data = await $.getJSON(`${baseURL}/${deckId}/draw/?count=1`);
+    $('#card-area').append(`<img src="${data.cards[0].image}">`);
+    if(data.remaining === 0) {
+      $('button').hide();
+    }
+  }
 
-  $('button').on('click', function() {
-    $.getJSON(`${baseURL}/${deckId}/draw/?count=1`)
-      .then(data => {
-        $('#card-area').append(`<img src="${data.cards[0].image}">`);
-        if(data.remaining === 0) {
-          $('button').hide();
-        }
-      })
-  });
+  $('button').on('click', drawCards);
 });
